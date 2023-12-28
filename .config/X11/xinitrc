@@ -1,11 +1,12 @@
 #!/bin/sh
-xrandr --output DP-1 --off --output HDMI-1 --mode 1024x768 --pos 0x0 --rotate normal --output DVI-D-1 --off --output DVI-D-2 --mode 1920x1080 --pos 1024x0 --rotate left
-
 xsetroot -solid '#90a599';
 
 while true; do
-   xsetroot -name "$(date)"
+	xsetroot -name "$(date)"
 	sleep 1
 done &
+
+xbanish &
+redshift &
 
 exec dwm
