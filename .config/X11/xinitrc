@@ -1,5 +1,5 @@
 #!/bin/sh
-xsetroot -solid '#90a599';
+hsetroot -solid '#84998f';
 
 while true; do
 	xsetroot -name "$(date)"
@@ -8,5 +8,6 @@ done &
 
 xbanish &
 redshift &
+picom &
 
 exec dwm
