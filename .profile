@@ -7,4 +7,5 @@ export PATH HOME TERM
 export XAUTHORITY=$HOME/.config/X11/Xauthority
 export XINITRC=$HOME/.config/X11/xinitrc
 export LESSHISTFILE="-"
-export EDITOR=nvim
+export EDITOR=vim
+export NO_COLOR=1
