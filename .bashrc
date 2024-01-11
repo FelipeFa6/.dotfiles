@@ -12,6 +12,6 @@ alias gb='git branch'
 alias gc='git commit -m'
 alias gd='git diff'
 alias gi='git init'
-alias gl='git log --online'
+alias gl='git log --oneline'
 alias gs='git status'
 
