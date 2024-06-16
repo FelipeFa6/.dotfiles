@@ -8,14 +8,7 @@ function random_file() {
    echo "$file"
 }
 
-# Directory where wallpapers are stored for different resolutions
-main_display='HDMI-1'
-second_display='DVI-D-2'
+WALLPAPER_DIR="$HOME/.local/share/wallpapers/"
+selected_wallpaper=$(random_file $WALLPAPER_DIR)
 
-# Get a random wallpaper file for each resolution
-main_wallpaper=$(random_file "/mnt/st1/imgs/wallpaper/1920x1080")
-second_wallpaper=$(random_file "/mnt/st1/imgs/wallpaper/1080x1920")
-
-# Set the wallpapers using xwallpaper
-xwallpaper --output "$main_display" --stretch "$main_wallpaper"
-xwallpaper --output "$second_display" --stretch "$second_wallpaper"
+xwallpaper --stretch $selected_wallpaper
