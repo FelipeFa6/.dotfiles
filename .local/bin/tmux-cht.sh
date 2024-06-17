@@ -1,6 +1,6 @@
 #!/bin/sh
 
-languages=`echo "php golang c lua" | tr ' ' '\n'`
+languages=`echo "bash php golang c lua" | tr ' ' '\n'`
 utils=`echo "grep xargs find git mv awk" | tr ' ' '\n'`
 
 selected=`printf "$languages\n$utils" | fzf`
