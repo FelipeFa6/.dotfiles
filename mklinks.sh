@@ -13,8 +13,8 @@ ln -s $(pwd)/.config/redshift $HOME/.config/
 ln -s $(pwd)/.config/x11 $HOME/.config/
 ln -s $(pwd)/.config/zathura $HOME/.config/
 ln -s $(pwd)/.config/zsh $HOME/.config/
+ln -s $(pwd)/.config/tmux $HOME/.config/
 
 mkdir -p $HOME/.local/share/
 ln -s $(pwd)/.local/share/wallpapers $HOME/.local/share/
-
-ln -s $(pwd)/bin/ $HOME/
+ln -s $(pwd)/.local/bin/ $HOME/.local/
