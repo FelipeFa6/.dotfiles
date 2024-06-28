@@ -20,10 +20,10 @@ yay -S --noconfirm doas git ttf-iosevka zsh
 echo "permit nopass :wheel" | sudo tee -a /etc/doas.conf
 
 # install suckless software
-doas git clone git@github.com:FelipeFa6/dwm $INSTALL_DIR
-doas git clone git@github.com:FelipeFa6/st $INSTALL_DIR
-doas git clone git@github.com:jcs/xbanish $INSTALL_DIR
-doas git clone https://git.suckless.org/dmenu $INSTALL_DIR
+doas git clone https://github.com/FelipeFa6/dwm $INSTALL_DIR/dwm
+doas git clone https://github.com/FelipeFa6/st $INSTALL_DIR/st
+doas git clone https://github.com/jcs/xbanish $INSTALL_DIR/xbanish
+doas git clone https://git.suckless.org/dmenu $INSTALL_DIR/dmenu
 
 doas make clean install -C $INSTALL_DIR/dmenu
 doas make clean install -C $INSTALL_DIR/dwm
@@ -32,6 +32,5 @@ doas make clean install -C $INSTALL_DIR/xbanish
 
 sudo chsh -s $(which zsh) $($USER)
 
-clear
 echo "Finished setup"
 cd $HOME
