@@ -5,8 +5,9 @@ while true; do
 	sleep 1
 done &
 
-xbanish &
+dunst &
 picom &
+xbanish &
 
 random_wallpaper.sh
 

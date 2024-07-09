@@ -1,5 +1,10 @@
-# .zshrc
+export ZSH="$ZDOTDIR/ohmyzsh"
+ZSH_THEME="terminalparty"
+plugins=(git)
+source $ZSH/oh-my-zsh.sh
 
+
+set -o vi
 alias ga='git add'
 alias gb='git branch'
 alias gc='git commit -m'
