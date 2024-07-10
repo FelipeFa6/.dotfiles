@@ -1,6 +1,8 @@
 export ZSH="$ZDOTDIR/ohmyzsh"
-ZSH_THEME="terminalparty"
-plugins=(git)
+ZSH_THEME="half-life"
+plugins=(
+    git
+)
 source $ZSH/oh-my-zsh.sh
 
 
