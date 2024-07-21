@@ -1,13 +1,13 @@
 #!/bin/sh
 while true; do
-    DATE=$(date)
-    xsetroot -name " [ ${DATE} ] "
+    sh $HOME/.config/x11/statusbar.sh
 	sleep 1
 done &
 
 dunst &
 picom &
 xbanish &
+dunst &
 
 random_wallpaper.sh
 

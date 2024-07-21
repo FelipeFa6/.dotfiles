@@ -8,6 +8,7 @@ export XINITRC=$HOME/.config/x11/xinitrc
 export ZDOTDIR="$HOME/.config/zsh"
 
 export PATH=$PATH:$HOME/.local/bin
+export PATH=$PATH:$HOME/go/bin
 export PROMPT='%F{green}%n@%m%f %F{blue}%~%f %# '
 
 # xdg
