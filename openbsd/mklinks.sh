@@ -5,6 +5,7 @@ mkdir -p $HOME/.config
 # link config
 ln -s $(pwd)/.kshrc $HOME/
 ln -s $(pwd)/.profile $HOME/
+ln -s $(pwd)/.xinitrc $HOME/
 ln -s $(pwd)/.config/* $HOME/.config/
 
 mkdir -p $HOME/.local/share/

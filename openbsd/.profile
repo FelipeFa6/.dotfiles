@@ -1,5 +1,6 @@
 # .zshenv
 
+export ENV=$HOME/.kshrc
 export EDITOR=nvim
 export LESSHISTFILE="-"
 export NO_COLOR=1
