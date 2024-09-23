@@ -10,5 +10,5 @@ for dir in $(ls -d $(pwd)/.config/*/); do
 done
 
 mkdir -p $HOME/.local/share/
-ln -s $(pwd)/.local/share/wallpapers $HOME/.local/share/
+ln -s $(pwd)/.local/share/* $HOME/.local/share/
 ln -s $(pwd)/.local/bin/ $HOME/.local/

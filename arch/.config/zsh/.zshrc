@@ -5,4 +5,3 @@ plugins=(git)
 source $ZSH/oh-my-zsh.sh
 
 set -o vi
-
