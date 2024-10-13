@@ -1,0 +1,82 @@
+Welcome to the Foris developer mini-challenge!
+Follow these steps to complete the task:
+
+1. **Download SQL Dump**
+
+    Choose between a MySQL or a PostgreSQL dump:
+    - For a local MySQL (version 8) environment,
+      download the dump from the endpoint
+      /dumps/mysql.
+    - For a local PostgreSQL (versions 13-15)
+      environment, download the dump from the
+      endpoint /dumps/psql.
+    - For an online PostgreSQL environment,
+      download the SQL script from the endpoint
+      /dumps/onlinepsql.
+
+   Note: If you are using Postman, make sure you
+   execute the request with `Send and Download` as
+   shown here
+   https://stackoverflow.com/questions/38975718/how-to-download-excel-xls-file-from-api-in-postman.
+
+2. **Import Database**
+
+    If you chose one of the local SQL
+    environments, import the downloaded SQL dump
+    into your local environment by your preferred
+    method (tested via terminal). Make sure the
+    import process completes successfully.
+
+    If you chose the online PostgreSQL
+    environment, head to
+    https://sqliteonline.com/, click on PostgreSQL
+    on the left sidebar, paste the dump contents,
+    and run the script. You should see the created
+    tables on the sidebar.
+
+3. **Inspect Database**
+
+    Take a moment to examine the imported database
+    to understand its structure, including the
+    models and data it contains.
+
+4. **Query Database**
+
+    Use an SQL query to find the answer to the
+    following question: "How many students who
+    enrolled in at least 5 groups between the
+    start of February 5 and the end of February 7,
+    enrolled in at least one subject with a code
+    ending in `1`?"
+
+   **Warning!** The value `2024-02-07` represents
+   the start of February 7, not its end.
+
+5. **Validate your answer**
+
+   You can validate your answer sending a `POST`
+   request to /validate.
+
+   The body must look like: `{"number_of_groups":
+   NUMBER_OF_GROUPS, "answer": YOUR_ANSWER}`
+
+   * `NUMBER_OF_GROUPS`: Is the number of groups
+     present in the table `group` of the given
+     dump. By giving this you prove that you
+     successfully inspect your database.
+
+   * `YOUR_ANSWER`: Is the answer of the question
+     asked in the previous step.
+
+   This query can be executed only once per hour,
+   so be careful when you send the request.
+
+6. **Submit Your Answer**
+
+    When you are done, submit your answer in the
+    questionnaire provided when submitting your
+    application via Getonboard.
+
+That's it! Good luck with the challenge.
+
+

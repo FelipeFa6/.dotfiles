@@ -1,4 +1,4 @@
-#files: 826	version: 5.9
+#files: 836	version: 5.9
 
 _comps=(
 '-' '_precommand'
@@ -123,6 +123,7 @@ _comps=(
 'bunzip2' '_bzip2'
 'burst' '_mh'
 'busctl' '_busctl'
+'bwrap' '_bwrap'
 'bzcat' '_bzip2'
 'bzegrep' '_grep'
 'bzfgrep' '_grep'
@@ -596,6 +597,7 @@ _comps=(
 'iftop' '_iftop'
 'ifup' '_net_interfaces'
 'ijoin' '_ispell'
+'img2sixel' '_img2sixel'
 'import' '_imagemagick'
 'inc' '_mh'
 'includeres' '_psutils'
@@ -794,6 +796,7 @@ _comps=(
 'mpc' '_mpc'
 'mplayer' '_mplayer'
 'mpstat' '_sysstat'
+'mpv' '_mpv'
 'mr' '_myrepos'
 'mrd' '_mtools'
 'mread' '_mtools'
@@ -811,6 +814,7 @@ _comps=(
 'mutt' '_mutt'
 'mv' '_mv'
 'mvim' '_vim'
+'mw' '_mutt-wizard.zsh'
 'mx' '_hosts'
 'mysql' '_mysql_utils'
 'mysqladmin' '_mysql_utils'
@@ -851,6 +855,7 @@ _comps=(
 'nocorrect' '_precommand'
 'noglob' '_precommand'
 'nohup' '_precommand'
+'notmuch' '_notmuch'
 'nova' '_openstack'
 'npm' '_npm'
 'ns' '_hosts'
@@ -902,6 +907,7 @@ _comps=(
 '-parameter-' '_parameter'
 'parec' '_pulseaudio'
 'parecord' '_pulseaudio'
+'pass' '_pass'
 'passwd' '_users'
 'paste' '_paste'
 'pasuspender' '_pulseaudio'
@@ -1253,6 +1259,7 @@ _comps=(
 'tee' '_tee'
 'telnet' '_telnet'
 'tex' '_tex'
+'texdoc' '_texdoc'
 'texi2any' '_texinfo'
 'texi2dvi' '_texinfo'
 'texi2pdf' '_texinfo'
@@ -1517,7 +1524,9 @@ _comps=(
 'ypwhich' '_yp'
 'ypxfr' '_yp'
 'ytalk' '_other_accounts'
+'yt-dlp' '_yt-dlp'
 'zargs' '_zargs'
+'zathura' '_zathura'
 'zcalc' '_zcalc'
 '-zcalc-line-' '_zcalc_line'
 'zcat' '_zcat'
@@ -1614,6 +1623,7 @@ _services=(
 
 _patcomps=(
 '*/(init|rc[0-9S]#).d/*' '_init_d'
+'notmuch-*' '_notmuch'
 )
 
 _postpatcomps=(
@@ -1678,19 +1688,21 @@ bindkey '^[,' _history-complete-newer
 bindkey '^[/' _history-complete-older
 bindkey '^[~' _bash_complete-word
 
-autoload -Uz _bat _bluetoothctl _bootctl _busctl _checkupdates \
-            _coredumpctl _ctr _curl _docker _downgrade \
-            _fd _firewalld _hostnamectl _journalctl _kernel-install \
-            _libinput _localectl _loginctl _machinectl _netctl \
-            _networkctl _oomctl _paccache _pacdiff _pacignore \
-            _paclist _paclog-pkglist _pacman _pacscripts _pacsearch \
-            _pacsort _pactree _parallel _pkgfile _pulseaudio \
-            _rankmirrors _resolvectl _rg _run0 _sd \
-            _sd_hosts_or_user_at_host _sd_machines _sd_outputmodes _sd_unit_files _shtab \
-            _systemctl _systemd _systemd-analyze _systemd-delta _systemd-inhibit \
-            _systemd-nspawn _systemd-path _systemd-run _systemd-tmpfiles _timedatectl \
-            _tldr _udevadm _updpkgsums _varlinkctl _wpctl \
-            _xwallpaper _yay _cdr _all_labels _all_matches \
+autoload -Uz _mutt-wizard.zsh _bat _bluetoothctl _bootctl _busctl \
+            _bwrap _checkupdates _coredumpctl _ctr _curl \
+            _docker _downgrade _email-notmuch _fd _firewalld \
+            _hostnamectl _img2sixel _journalctl _kernel-install _libinput \
+            _localectl _loginctl _machinectl _mpv _netctl \
+            _networkctl _notmuch _oomctl _paccache _pacdiff \
+            _pacignore _paclist _paclog-pkglist _pacman _pacscripts \
+            _pacsearch _pacsort _pactree _parallel _pass \
+            _pkgfile _pulseaudio _rankmirrors _resolvectl _rg \
+            _run0 _sd _sd_hosts_or_user_at_host _sd_machines _sd_outputmodes \
+            _sd_unit_files _shtab _systemctl _systemd _systemd-analyze \
+            _systemd-delta _systemd-inhibit _systemd-nspawn _systemd-path _systemd-run \
+            _systemd-tmpfiles _texdoc _timedatectl _tldr _udevadm \
+            _updpkgsums _varlinkctl _wpctl _xwallpaper _yay \
+            _yt-dlp _zathura _cdr _all_labels _all_matches \
             _alternative _approximate _arg_compile _arguments _bash_completions \
             _cache_invalid _call_function _combination _complete _complete_debug \
             _complete_help _complete_help_generic _complete_tag _comp_locale _correct \
@@ -1848,5 +1860,5 @@ autoload -Uz +X _call_program
 typeset -gUa _comp_assocs
 _comp_assocs=( '' )
 
-#omz revision: f6cd6a776993b584f4abbdd204c6e4011b7d2f93
+#omz revision: a72a26406ad3aa9a47c3f5227291bad23494bed0
 #omz fpath: /home/felipe/.config/zsh/ohmyzsh/plugins/git /home/felipe/.config/zsh/ohmyzsh/functions /home/felipe/.config/zsh/ohmyzsh/completions /home/felipe/.config/zsh/ohmyzsh/custom/functions /home/felipe/.config/zsh/ohmyzsh/custom/completions /home/felipe/.config/zsh/ohmyzsh/cache/completions /usr/local/share/zsh/site-functions /usr/share/zsh/site-functions /usr/share/zsh/functions/Calendar /usr/share/zsh/functions/Chpwd /usr/share/zsh/functions/Completion /usr/share/zsh/functions/Completion/Base /usr/share/zsh/functions/Completion/Linux /usr/share/zsh/functions/Completion/Unix /usr/share/zsh/functions/Completion/X /usr/share/zsh/functions/Completion/Zsh /usr/share/zsh/functions/Exceptions /usr/share/zsh/functions/MIME /usr/share/zsh/functions/Math /usr/share/zsh/functions/Misc /usr/share/zsh/functions/Newuser /usr/share/zsh/functions/Prompts /usr/share/zsh/functions/TCP /usr/share/zsh/functions/VCS_Info /usr/share/zsh/functions/VCS_Info/Backends /usr/share/zsh/functions/Zftp /usr/share/zsh/functions/Zle

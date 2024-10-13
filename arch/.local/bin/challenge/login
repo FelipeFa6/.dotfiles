@@ -1,0 +1,3 @@
+{"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyODQzMzQxNCwianRpIjoiODdlZDk3ZjMtOTdlYy00MWJkLTk3MmItNDZiYWNmYWU0OGE0IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6ImZvcmlzX2NoYWxsZW5nZSIsIm5iZiI6MTcyODQzMzQxNCwiY3NyZiI6IjhiZDBkMWVjLWFmZWUtNGVlNy1iMGEyLTAxMDZkOTk1ZDExZCIsImV4cCI6MTcyODQzNzAxNH0.6RARb0RRviDhAvMaAPFzurr9Afy_W57-pqG5qvvP_7U","instructions":"Connect to `/challenge` using your access_token and follow the instructions in the response. Note that the access_token expires in one hour. Include it in the Authorization header in the format `Bearer {access_token}`. For examples, refer to: https://swagger.io/docs/specification/authentication/bearer-authentication/."}
+
+
