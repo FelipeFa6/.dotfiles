@@ -1,6 +1,6 @@
 #!/bin/sh
 
-xwallpaper --stretch $HOME/.local/share/wallpapers/monochrome.jpg
+xwallpaper --stretch $HOME/.local/share/wallpapers/wallpaper.jpeg
 
 while true; do
 	BATTERY=$(apm -l)
