@@ -9,6 +9,6 @@ picom &
 xbanish &
 dunst &
 
-xwallapper --stretch $HOME/.local/share/wallpapers/wallpaper.jpeg
+xwallpaper --stretch $HOME/.local/share/wallpapers/wallpaper.jpg
 
 exec dwm
