@@ -1,0 +1,22 @@
+# Shell options
+shopt -s histappend
+shopt -s checkwinsize
+
+# vi mode
+set -o vi
+
+# History
+HISTCONTROL=ignoreboth
+HISTSIZE=10000
+HISTFILESIZE=50000
+
+# Load modular configuration
+for file in \
+    aliases \
+    functions \
+    prompt \
+    completion
+do
+    [[ -f ~/.config/bash/$file ]] && source ~/.config/bash/$file
+done
+

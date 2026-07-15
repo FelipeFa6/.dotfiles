@@ -1,0 +1,14 @@
+Step 1: Enable Custom Stylesheets
+- Open Firefox and go to about:config.
+- Search for: toolkit.legacyUserProfileCustomizations.stylesheets
+- Set it to true by double-clicking.
+
+Step 2: Open Your Profile Folder
+- Go to about:support in the address bar.
+- Find the Profile Folder row.
+
+Step 3:
+- Go to the profile folder
+- Paste this Chrome directory
+- Restart firefox
+

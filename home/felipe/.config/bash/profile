@@ -1,0 +1,25 @@
+# XDG Base Directory Specification
+
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_CACHE_HOME="$HOME/.cache"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_STATE_HOME="$HOME/.local/state"
+
+: "${XDG_RUNTIME_DIR:=/run/user/$(id -u)}"
+export XDG_RUNTIME_DIR
+
+# Bash
+export HISTFILE="$XDG_STATE_HOME/bash/history"
+
+# tmux
+export TMUX_CONF="$XDG_CONFIG_HOME/tmux/tmux.conf"
+
+# X11
+export XAUTHORITY="$XDG_RUNTIME_DIR/Xauthority"
+export XINITRC="$XDG_CONFIG_HOME/x11/xinitrc"
+
+# PATH
+export PATH="$HOME/.local/bin:$PATH"
+
+# Optional environment additions
+[[ -f ~/.config/bash/environment ]] && source ~/.config/bash/environment
