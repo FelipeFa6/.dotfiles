@@ -20,3 +20,5 @@ do
     [[ -f ~/.config/bash/$file ]] && source ~/.config/bash/$file
 done
 
+# aliases
+alias dotfiles='git --git-dir=/home/$USER/.dotfiles --work-tree=/'

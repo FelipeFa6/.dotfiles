@@ -23,3 +23,10 @@ export PATH="$HOME/.local/bin:$PATH"
 
 # Optional environment additions
 [[ -f ~/.config/bash/environment ]] && source ~/.config/bash/environment
+
+# npm declutter
+export npm_config_cache="/var/cache/npm"
+# git declutter
+export GIT_CONFIG_GLOBAL="$HOME/.config/git/config"
+# pass declutter
+export PASSWORD_STORE_DIR="$HOME/.local/share/password-store"
