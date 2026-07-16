@@ -6,4 +6,6 @@ done &
 
 /usr/lib/xdg-desktop-portal-gtk &
 
+xwallpaper --stretch ~/.local/wallpaper/mountain.jpg
+
 exec dwm
