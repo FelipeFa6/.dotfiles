@@ -6,6 +6,8 @@ done &
 
 /usr/lib/xdg-desktop-portal-gtk &
 
-xwallpaper --stretch ~/.local/wallpaper/mountain.jpg
+xwallpaper --stretch ~/.local/wallpaper/bunny.jpg
+
+picom &
 
 exec dwm

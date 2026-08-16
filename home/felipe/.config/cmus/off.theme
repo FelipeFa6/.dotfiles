@@ -1,0 +1,70 @@
+# off — theme monocromo para cmus (sin colores)
+#
+# No define ningun color: todo hereda el fondo y el texto por defecto de la
+# terminal. La jerarquia visual se logra solo con atributos (reverse / bold),
+# asi que sigue el esquema de colores que tengas configurado en tu terminal.
+
+##### base ####################################################################
+set color_win_fg=default
+set color_win_bg=default
+set color_win_attr=default
+
+##### linea de comandos #######################################################
+set color_cmdline_fg=default
+set color_cmdline_bg=default
+set color_cmdline_attr=default
+set color_error=default
+set color_info=default
+set color_separator=default
+
+##### barra de estado (abajo) #################################################
+set color_statusline_fg=default
+set color_statusline_bg=default
+set color_statusline_attr=reverse
+set color_statusline_progress_fg=default
+set color_statusline_progress_bg=default
+set color_statusline_progress_attr=reverse
+
+##### linea de titulo (pista sonando, abajo) ##################################
+set color_titleline_fg=default
+set color_titleline_bg=default
+set color_titleline_attr=reverse|bold
+
+##### cabecera de columnas (arriba) ###########################################
+set color_win_title_fg=default
+set color_win_title_bg=default
+set color_win_title_attr=reverse
+
+##### pista sonando ###########################################################
+# sin seleccionar: se distingue solo por la negrita
+set color_win_cur=default
+set color_win_cur_attr=bold
+
+# seleccionada, ventana activa
+set color_win_cur_sel_fg=default
+set color_win_cur_sel_bg=default
+set color_win_cur_sel_attr=reverse|bold
+
+# seleccionada, ventana inactiva
+set color_win_inactive_cur_sel_fg=default
+set color_win_inactive_cur_sel_bg=default
+set color_win_inactive_cur_sel_attr=underline|bold
+
+##### pistas normales #########################################################
+# seleccionada, ventana activa
+set color_win_sel_fg=default
+set color_win_sel_bg=default
+set color_win_sel_attr=reverse
+
+# seleccionada, ventana inactiva
+set color_win_inactive_sel_fg=default
+set color_win_inactive_sel_bg=default
+set color_win_inactive_sel_attr=underline
+
+##### vista de album (track window) ###########################################
+set color_trackwin_album_fg=default
+set color_trackwin_album_bg=default
+set color_trackwin_album_attr=bold
+
+##### navegador de archivos ###################################################
+set color_win_dir=default

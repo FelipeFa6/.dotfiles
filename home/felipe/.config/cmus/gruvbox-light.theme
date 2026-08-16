@@ -1,0 +1,78 @@
+# Gruvbox Light — theme para cmus
+#
+# cmus solo acepta indices de color 0..255 (o -1/default), no valores hex.
+# Cada indice de abajo es el equivalente xterm-256 del hex de tu paleta:
+#
+#   229 = #fbf1c7 bg      237 = #3c3836 fg      243 = #7c6f64 gris
+#   245 = #928374 gris+   124 = #cc241d rojo    106 = #98971a verde
+#   172 = #d79921 amaril. 66  = #458588 azul    132 = #b16286 morado
+#   72  = #689d6a aqua    88  = #9d0006 rojo+   100 = #79740e verde+
+#   136 = #b57614 amar.+  24  = #076678 azul+   96  = #8f3f71 morado+
+#   29  = #427b58 aqua+
+#
+# Requiere una terminal con 256 colores (TERM=xterm-256color o similar).
+
+##### base ####################################################################
+set color_win_fg=237
+set color_win_bg=229
+set color_win_attr=default
+
+##### linea de comandos #######################################################
+set color_cmdline_fg=237
+set color_cmdline_bg=229
+set color_cmdline_attr=default
+set color_error=88
+set color_info=100
+set color_separator=245
+
+##### barra de estado (abajo) #################################################
+set color_statusline_fg=229
+set color_statusline_bg=243
+set color_statusline_attr=default
+set color_statusline_progress_fg=229
+set color_statusline_progress_bg=29
+set color_statusline_progress_attr=default
+
+##### linea de titulo (pista sonando, abajo) ##################################
+set color_titleline_fg=229
+set color_titleline_bg=24
+set color_titleline_attr=bold
+
+##### cabecera de columnas (arriba) ###########################################
+set color_win_title_fg=229
+set color_win_title_bg=29
+set color_win_title_attr=bold
+
+##### pista sonando ###########################################################
+# sin seleccionar
+set color_win_cur=136
+set color_win_cur_attr=default
+
+# seleccionada, ventana activa
+set color_win_cur_sel_fg=172
+set color_win_cur_sel_bg=24
+set color_win_cur_sel_attr=bold
+
+# seleccionada, ventana inactiva
+set color_win_inactive_cur_sel_fg=136
+set color_win_inactive_cur_sel_bg=245
+set color_win_inactive_cur_sel_attr=default
+
+##### pistas normales #########################################################
+# seleccionada, ventana activa
+set color_win_sel_fg=229
+set color_win_sel_bg=24
+set color_win_sel_attr=default
+
+# seleccionada, ventana inactiva
+set color_win_inactive_sel_fg=229
+set color_win_inactive_sel_bg=245
+set color_win_inactive_sel_attr=default
+
+##### vista de album (track window) ###########################################
+set color_trackwin_album_fg=96
+set color_trackwin_album_bg=229
+set color_trackwin_album_attr=bold
+
+##### navegador de archivos ###################################################
+set color_win_dir=24

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# .config/bash/aliases
+alias dotfiles='git --git-dir=/home/$USER/.dotfiles --work-tree=/'
+
+alias ga='git add'
+alias gc='git commit -m'
+alias gcm='git checkout master'
+alias gco='git checkout -b'
+alias gpush='git push'
+alias gpull='git pull'
+alias gs='git status'
