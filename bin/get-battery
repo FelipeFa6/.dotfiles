@@ -1,0 +1,21 @@
+#!/bin/sh
+BAT=/sys/class/power_supply/BAT0
+
+# No battery present (docked, desktop, or kernel named it BAT1)
+if [ ! -r "$BAT/capacity" ] || [ ! -r "$BAT/status" ]; then
+	printf 'AC'
+	exit 0
+fi
+
+STATUS=$(cat "$BAT/status")
+CAP=$(cat "$BAT/capacity")
+
+case "$STATUS" in
+	Charging)              ICON='+' ;;
+	Discharging)           ICON='-' ;;
+	Full)                  ICON='=' ;;
+	'Not charging')        ICON='=' ;;
+	*)                     ICON='?' ;;
+esac
+
+printf '%s %s%%' "$ICON" "$CAP"

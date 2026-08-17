@@ -8,6 +8,7 @@ done &
 
 xwallpaper --stretch ~/.local/wallpaper/bunny.jpg
 
-picom &
+# picom &
+xbanish &
 
 exec dwm

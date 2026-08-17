@@ -35,5 +35,5 @@ export PASSWORD_STORE_DIR="$HOME/.local/share/password-store"
 
 export VISUAL=nvim
 export EDITOR=nvim
-export NNN_OPENER=xdg-open
+export NNN_OPENER=edit
 export NNN_PLUG='u:unzipsel'

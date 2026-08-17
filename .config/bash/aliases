@@ -2,7 +2,6 @@
 
 # .config/bash/aliases
 alias dotfiles='git --git-dir=$HOME/.dotfiles --work-tree=$HOME'
-
 alias ga='git add'
 alias gc='git commit -m'
 alias gcm='git checkout master'
@@ -10,3 +9,8 @@ alias gco='git checkout -b'
 alias gpush='git push'
 alias gpull='git pull'
 alias gs='git status'
+
+# radios and audio 
+alias audio='mpv --no-video'
+alias lofi='mpv --no-video https://boxradio-edge-00.streamafrica.net/lofi'
+

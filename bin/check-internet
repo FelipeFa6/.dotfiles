@@ -1,0 +1,6 @@
+#!/bin/sh
+for i in /sys/class/net/*/operstate; do
+	case "$i" in */lo/*) continue ;; esac
+	[ "$(cat "$i")" = up ] && { printf 'Online'; exit 0; }
+done
+printf 'Offline'
