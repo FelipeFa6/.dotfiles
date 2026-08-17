@@ -1,0 +1,14 @@
+#!/bin/sh
+# ~/.local/bin/tmux-status
+BAT=/sys/class/power_supply/BAT0
+STATUS=$(cat "$BAT/status" 2>/dev/null)
+CAP=$(cat "$BAT/capacity" 2>/dev/null)
+
+case "$STATUS" in
+	Charging)    ICON="+" ;;
+	Discharging) ICON="-" ;;
+	Full)        ICON="=" ;;
+	*)           ICON="?" ;;
+esac
+
+printf '[%s %s%%] [%s]' "$ICON" "$CAP" "$(cat /tmp/tmux-net 2>/dev/null || echo '?')"

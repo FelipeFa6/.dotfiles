@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+sel=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
+
+if [ -s "$sel" ]; then
+    while IFS= read -r -d '' file || [ -n "$file" ]; do
+        unzip "$file"
+    done < "$sel"
+
+    [ -p "$NNN_PIPE" ] && printf "-" > "$NNN_PIPE"
+else
+    unzip "$1"
+fi

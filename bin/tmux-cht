@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+languages=(
+        go
+        bash
+        c
+        # javascript
+        # lua
+        # php
+        # python
+        # sql
+)
+
+commands=(
+    # awk chmod chown curl cut docker ffmpeg find git grep jq kubectl
+    # make mv rsync sed ssh systemctl tar tmux tr xargs
+)
+
+selected=$(printf '%s\n' "${languages[@]}" "${commands[@]}" | fzf)
+[[ -z $selected ]] && exit 0
+
+read -rp "Enter Query: " query
+query=$(printf '%s' "$query" | tr ' ' '+')
+
+is_language=false
+for lang in "${languages[@]}"; do
+    [[ $lang == "$selected" ]] && { is_language=true; break; }
+done
+
+if [[ -z $query ]]; then
+    url="cht.sh/$selected"
+elif $is_language; then
+    url="cht.sh/$selected/$query"
+else
+    url="cht.sh/$selected~$query"
+fi
+
+tmux neww bash -c "curl -s '$url' | less -R"

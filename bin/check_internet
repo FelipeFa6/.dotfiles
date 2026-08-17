@@ -1,0 +1,11 @@
+#!/bin/sh
+ping=$(ping -c 1 -W 2 1.1.1.1 >/dev/null 2>&1)
+
+if $ping; then
+  STATUS="Online"
+else
+  STATUS="Offline"
+fi
+
+printf '%s' "$STATUS"
+

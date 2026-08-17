@@ -1,0 +1,439 @@
+#!/usr/bin/env bash
+#
+# album2mp3 — convert albums to MP3 for Bluetooth listening
+#
+#   album2mp3 [options] <dir>...            one album, an artist, or a library
+#
+# Examples:
+#   album2mp3 artist1/album2                -> ./output/artist1/album2
+#   album2mp3 artist1/                      -> every album of artist1
+#   album2mp3 -o ~/bt music/                -> the whole library
+#   album2mp3 -o ~/bt artist1/*             -> shell glob, one album per match
+#
+# Handles .flac / .m4a / .mp3 / .wav / .ogg / .opus / .wma / .aiff / .ape,
+# keeps tags and cover art, downsamples hi-res, copies loose covers.
+
+set -uo pipefail
+
+# ---------------------------------------------------------------- defaults ---
+QUALITY=2                 # libmp3lame VBR level: 0 (~245k) … 9 (~65k). 2 ≈ 190k
+BITRATE=""                # if set (e.g. 192k), use CBR instead of VBR
+JOBS="$(nproc 2>/dev/null || echo 4)"
+FORCE=0                   # overwrite existing output files
+REENCODE_MP3=0            # re-encode source .mp3 instead of copying it
+DRYRUN=0
+EMBED_COVER=1             # if a track has no art, embed the folder cover
+LIBROOT=""                # library root; artist/album gets appended to it
+KEEP=2                    # trailing source components to recreate under root
+
+SRC_EXT=(flac m4a mp3 wav ogg opus wma aiff aif ape alac wv)
+COVER_NAME=(cover folder front album albumart artwork)
+
+# find(1) predicate list for audio files: -iname '*.flac' -o -iname '*.m4a' …
+FIND_EXT=()
+for _e in "${SRC_EXT[@]}"; do
+	((${#FIND_EXT[@]})) && FIND_EXT+=(-o)
+	FIND_EXT+=(-iname "*.$_e")
+done
+unset _e
+
+# ------------------------------------------------------------------ output ---
+if [[ -t 1 ]]; then C_R=$'\e[31m' C_G=$'\e[32m' C_Y=$'\e[33m' C_B=$'\e[36m' C_D=$'\e[2m' C_0=$'\e[0m'
+else C_R='' C_G='' C_Y='' C_B='' C_D='' C_0=''; fi
+
+die()  { printf '%serror:%s %s\n' "$C_R" "$C_0" "$*" >&2; exit 1; }
+warn() { printf '%swarn:%s %s\n' "$C_Y" "$C_0" "$*" >&2; }
+info() { printf '%s::%s %s\n' "$C_B" "$C_0" "$*"; }
+
+usage() {
+	cat <<EOF
+album2mp3 — convert albums to MP3 for Bluetooth listening
+
+usage: ${0##*/} [options] <dir>... [output-dir]
+
+  Any directory works: an album, an artist folder, or a whole library.
+  Directories are scanned for albums — a folder holding audio files — and
+  each one is converted separately, keeping its own folder name. Multi-disc
+  albums (CD1/CD2, Disc 1…) stay a single album.
+
+    ${0##*/} artist1/album2            -> ./output/artist1/album2
+    ${0##*/} artist1/                  -> ./output/artist1/<each album>
+    ${0##*/} -o ~/bt music/            -> ~/bt/<artist>/<album> for all
+    ${0##*/} -o ~/bt artist1/*         -> glob; one album per match
+    ${0##*/} artist1/album2 ~/bt/x     -> exactly ~/bt/x (single album only)
+
+options:
+  -o ROOT     library root to append <artist>/<album> to (default: ./output)
+  -p N        how many trailing source components to recreate (default: $KEEP)
+                -p 1 = album only, -p 2 = artist/album, -p 3 = genre/artist/album
+  -q N        LAME VBR quality 0-9 (default: $QUALITY  ≈190 kbps; 0 ≈245, 4 ≈165)
+  -b RATE     use CBR at RATE instead of VBR, e.g. -b 192k
+  -j N        parallel jobs (default: $JOBS)
+  -f          overwrite files that already exist in the output dir
+  -m          re-encode source .mp3 files too (default: copy them as-is)
+  -C          do NOT embed the folder cover into tracks that lack art
+  -l          list the albums that would be converted, then exit
+  -n          dry run — show what would happen, touch nothing
+  -h          this help
+
+notes:
+  * Existing embedded cover art is carried over untouched, and any loose
+    cover.jpg / folder.png is copied to the output as-is.
+  * A track with no embedded art gets the folder cover embedded (-C disables).
+  * Tags are written as ID3v2.3 + ID3v1 — best device compatibility.
+  * 88.2/96/176/192 kHz sources are resampled to 44.1/48 kHz; multichannel
+    is downmixed to stereo.
+  * Albums already present in the output are skipped unless -f is given.
+EOF
+}
+
+# ------------------------------------------------------------------- parse ---
+LIST_ONLY=0
+while getopts ':q:b:j:o:p:fmRCnlh' opt; do
+	case $opt in
+		q) QUALITY=$OPTARG ;;
+		b) BITRATE=$OPTARG ;;
+		j) JOBS=$OPTARG ;;
+		o) LIBROOT=${OPTARG%/} ;;
+		p) KEEP=$OPTARG ;;
+		f) FORCE=1 ;;
+		m) REENCODE_MP3=1 ;;
+		R) : ;;                 # accepted for compatibility; now always on
+		C) EMBED_COVER=0 ;;
+		l) LIST_ONLY=1 ;;
+		n) DRYRUN=1 ;;
+		h) usage; exit 0 ;;
+		:) die "option -$OPTARG needs an argument" ;;
+		?) die "unknown option -$OPTARG (try -h)" ;;
+	esac
+done
+shift $((OPTIND - 1))
+
+[[ $# -ge 1 ]] || { usage >&2; exit 1; }
+[[ $QUALITY =~ ^[0-9]$ ]] || die "-q must be 0-9"
+[[ $JOBS =~ ^[1-9][0-9]*$ ]] || die "-j must be a positive integer"
+[[ $KEEP =~ ^[0-9]+$ ]] || die "-p must be a non-negative integer"
+
+command -v ffmpeg  >/dev/null || die "ffmpeg not found — pacman -S ffmpeg"
+command -v ffprobe >/dev/null || die "ffprobe not found — pacman -S ffmpeg"
+
+# --- sources, and the legacy "<album> <output-dir>" two-argument form ---------
+LITERAL_DST=""
+if [[ $# -eq 2 && -z $LIBROOT && ! -d ${2} ]]; then
+	LITERAL_DST=${2%/}          # 2nd arg names a dir that doesn't exist yet
+	set -- "$1"
+elif [[ $# -eq 2 && -z $LIBROOT ]] && ! find "${2%/}" -maxdepth 2 -type f \( "${FIND_EXT[@]}" \) -print -quit 2>/dev/null | grep -q .; then
+	LITERAL_DST=${2%/}          # …or an existing dir with no audio in it
+	set -- "$1"
+fi
+
+declare -A seen=()
+SOURCES=()
+for arg in "$@"; do
+	arg=${arg%/}
+	[[ $arg ]] || arg=/
+	if [[ ! -d $arg ]]; then
+		warn "not a directory, ignoring: $arg"
+		continue
+	fi
+	abs=$(cd -- "$arg" && pwd) || continue
+	[[ ${seen[$abs]+x} ]] && continue
+	seen[$abs]=1
+	SOURCES+=("$abs")
+done
+((${#SOURCES[@]})) || die "no usable source directories given"
+
+ROOT=${LIBROOT:-output}
+
+# absolute form of a path that may not exist yet
+abs_path() {
+	local p=$1 d b
+	[[ -d $p ]] && { (cd -- "$p" && pwd); return; }
+	d=${p%/*}; b=${p##*/}
+	[[ $d == "$p" ]] && d=.
+	[[ -d $d ]] && { printf '%s/%s' "$(cd -- "$d" && pwd)" "$b"; return; }
+	printf '%s' "$p"
+}
+ROOT_ABS=$(abs_path "$ROOT")
+# ----------------------------------------------------------------- helpers ---
+# does this file already carry cover art?
+has_art() {
+	ffprobe -v error -select_streams v -show_entries stream=codec_name \
+		-of default=nw=1:nk=1 -- "$1" 2>/dev/null | head -1
+}
+
+# first cover-ish image in a directory (cover.jpg, folder.png, …)
+find_cover() {
+	local dir=$1 n e f
+	local -a names
+	read -ra names <<<"${COVER_NAME_STR:-cover folder front album albumart artwork}"
+	shopt -s nocaseglob
+	for n in "${names[@]}"; do
+		for e in jpg jpeg png webp; do
+			for f in "$dir/$n.$e"; do
+				[[ -f $f ]] && { printf '%s' "$f"; shopt -u nocaseglob; return 0; }
+			done
+		done
+	done
+	shopt -u nocaseglob
+	return 1
+}
+
+# run ffmpeg quietly to $1; remaining args are the ffmpeg command
+try_ffmpeg() {
+	local dest=$1; shift
+	ffmpeg -nostdin -hide_banner -loglevel error -y "$@" -- "$dest" 2>/dev/null
+}
+
+# ------------------------------------------------------------------ worker ---
+convert_one() {
+	local src=$1
+	local rel base name ext outdir out tmp
+	rel=${src#"$SRC"/}
+	base=${rel##*/}
+	name=${base%.*}
+	ext=${base##*.}
+	ext=${ext,,}
+
+	outdir=$DST
+	[[ $rel == */* ]] && outdir="$DST/${rel%/*}"
+	out="$outdir/$name.mp3"
+
+	if [[ -e $out && $FORCE -eq 0 ]]; then
+		printf '  %sskip%s   %s\n' "$C_D" "$C_0" "$name"
+		return 0
+	fi
+
+	# already MP3 → copying beats a second lossy generation
+	if [[ $ext == mp3 && $REENCODE_MP3 -eq 0 ]]; then
+		if ((DRYRUN)); then printf '  %scopy%s   %s\n' "$C_Y" "$C_0" "$base"; return 0; fi
+		mkdir -p -- "$outdir" || return 1
+		cp --preserve=timestamps -- "$src" "$out" || return 1
+		printf '  %scopy%s   %s\n' "$C_Y" "$C_0" "$base"
+		return 0
+	fi
+
+	# --- encoder settings -----------------------------------------------
+	local -a acodec conv
+	if [[ $BITRATE ]]; then acodec=(-b:a "$BITRATE"); else acodec=(-q:a "$QUALITY"); fi
+
+	local sr ch
+	sr=$(ffprobe -v error -select_streams a:0 -show_entries stream=sample_rate \
+	     -of default=nw=1:nk=1 -- "$src" 2>/dev/null | head -1)
+	ch=$(ffprobe -v error -select_streams a:0 -show_entries stream=channels \
+	     -of default=nw=1:nk=1 -- "$src" 2>/dev/null | head -1)
+	[[ $sr =~ ^[0-9]+$ ]] || sr=44100
+	[[ $ch =~ ^[0-9]+$ ]] || ch=2
+
+	conv=()
+	if ((sr > 48000)); then
+		if ((sr % 44100 == 0)); then conv+=(-ar 44100); else conv+=(-ar 48000); fi
+	fi
+	((ch > 2)) && conv+=(-ac 2)
+
+	if ((DRYRUN)); then
+		printf '  %senc%s    %s %s-> %s%s\n' "$C_G" "$C_0" "$base" "$C_D" "$name.mp3" "$C_0"
+		return 0
+	fi
+
+	mkdir -p -- "$outdir" || return 1
+	tmp="$outdir/.${name}.part.mp3"
+
+	local -a tail=(-c:a libmp3lame "${acodec[@]}" "${conv[@]}"
+	               -map_metadata 0 -id3v2_version 3 -write_id3v1 1)
+	local art='-'
+
+	# --- tier 1+2: keep the art the file already carries, untouched ------
+	if [[ $(has_art "$src") ]]; then
+		if try_ffmpeg "$tmp" -i "$src" -map 0:a:0 -map 0:v:0 \
+				-c:v copy -disposition:v attached_pic "${tail[@]}"
+		then art='keep'
+		elif try_ffmpeg "$tmp" -i "$src" -map 0:a:0 -map 0:v:0 \
+				-c:v mjpeg -q:v 2 -disposition:v attached_pic "${tail[@]}"
+		then art='rewrap'
+		fi
+	# --- or borrow the folder cover for a track that has none ------------
+	elif ((EMBED_COVER)); then
+		local cover; cover=$(find_cover "${src%/*}")
+		if [[ $cover ]]; then
+			local vc=mjpeg
+			case ${cover,,} in *.jpg|*.jpeg) vc=copy ;; esac
+			if try_ffmpeg "$tmp" -i "$src" -i "$cover" -map 0:a:0 -map 1:v:0 \
+					-c:v "$vc" -q:v 2 -disposition:v attached_pic "${tail[@]}"
+			then art='folder'
+			fi
+		fi
+	fi
+
+	# --- last resort: audio only, rather than failing the track ----------
+	if [[ $art == '-' ]] && ! try_ffmpeg "$tmp" -i "$src" -map 0:a:0 -vn "${tail[@]}"; then
+		rm -f -- "$tmp"
+		printf '  %sFAIL%s   %s\n' "$C_R" "$C_0" "$base" >&2
+		return 1
+	fi
+
+	mv -f -- "$tmp" "$out" || return 1
+	case $art in
+		keep)   printf '  %senc%s    %s %sart: embedded%s\n'    "$C_G" "$C_0" "$name.mp3" "$C_D" "$C_0" ;;
+		rewrap) printf '  %senc%s    %s %sart: embedded (rewrapped)%s\n' "$C_G" "$C_0" "$name.mp3" "$C_D" "$C_0" ;;
+		folder) printf '  %senc%s    %s %sart: folder cover%s\n' "$C_G" "$C_0" "$name.mp3" "$C_D" "$C_0" ;;
+		*)      printf '  %senc%s    %s %sart: none%s\n'         "$C_G" "$C_0" "$name.mp3" "$C_Y" "$C_0" ;;
+	esac
+}
+export -f convert_one has_art find_cover try_ffmpeg
+export SRC DST QUALITY BITRATE FORCE REENCODE_MP3 DRYRUN EMBED_COVER
+export COVER_NAME_STR="${COVER_NAME[*]}"
+export C_R C_G C_Y C_B C_D C_0
+
+# ------------------------------------------------------------- discovery ---
+# last $2 components of a path: tail_path /m/artist/album 2 -> artist/album
+tail_path() {
+	local path=${1%/} n=$2 out='' comp
+	while ((n-- > 0)) && [[ $path == */* ]]; do
+		comp=${path##*/}
+		path=${path%/*}
+		out=${out:+/$out}
+		out="$comp$out"
+	done
+	printf '%s' "$out"
+}
+
+# CD1 / Disc 2 / Vol. 3 — a disc subfolder, not an album of its own
+is_disc_dir() {
+	[[ ${1,,} =~ ^(cd|disc|disk|vol|volume)[[:space:]._-]*[0-9]+$ ]]
+}
+
+dir_has_audio() {   # audio sitting directly in this dir
+	find "$1" -maxdepth 1 -type f \( "${FIND_EXT[@]}" \) -print -quit 2>/dev/null | grep -q .
+}
+dir_has_audio_deep() {  # audio anywhere below
+	find "$1" -type f \( "${FIND_EXT[@]}" \) -print -quit 2>/dev/null | grep -q .
+}
+
+# emit (NUL-separated) every album directory at or below $1
+find_albums() {
+	local d=$1 sub all_disc=1
+	local -a subs=()
+
+	dir_has_audio "$d" && { printf '%s\0' "$d"; return; }
+
+	while IFS= read -r -d '' sub; do
+		dir_has_audio_deep "$sub" && subs+=("$sub")
+	done < <(find "$d" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | sort -z)
+
+	((${#subs[@]})) || return
+
+	# CD1/CD2 under a bare album folder: the parent is the album
+	for sub in "${subs[@]}"; do
+		is_disc_dir "${sub##*/}" || { all_disc=0; break; }
+	done
+	((all_disc)) && { printf '%s\0' "$d"; return; }
+
+	for sub in "${subs[@]}"; do find_albums "$sub"; done
+}
+
+# where does this album go? base=$1 album=$2
+album_dest() {
+	local base=${1%/} album=$2 rel='' prefix dst depth=0 n tmp
+	[[ $album != "$base" ]] && rel=${album#"$base"/}
+	if [[ $rel ]]; then
+		tmp=$rel depth=1
+		while [[ $tmp == */* ]]; do tmp=${tmp#*/}; ((depth++)); done
+	fi
+	n=$((KEEP - depth)); ((n < 0)) && n=0
+	prefix=$(tail_path "$base" "$n")
+	dst=$ROOT
+	[[ $prefix ]] && dst="$dst/$prefix"
+	[[ $rel ]] && dst="$dst/$rel"
+	printf '%s' "$dst"
+}
+
+# ---------------------------------------------------------------- collect ---
+ALBUMS=() DESTS=()
+n_selfskip=0
+for base in "${SOURCES[@]}"; do
+	while IFS= read -r -d '' a; do
+		# don't re-convert our own output when it sits inside the library
+		if [[ $LITERAL_DST == '' && ${a}/ == "$ROOT_ABS"/* ]]; then
+			((n_selfskip++)); continue
+		fi
+		ALBUMS+=("$a")
+		DESTS+=("$(album_dest "$base" "$a")")
+	done < <(find_albums "$base")
+done
+((n_selfskip)) && warn "skipped $n_selfskip album(s) already inside $ROOT"
+
+((${#ALBUMS[@]})) || die "no albums found (no directory contained audio files)"
+
+if [[ $LITERAL_DST ]]; then
+	((${#ALBUMS[@]} == 1)) || die "${#ALBUMS[@]} albums found — a single output dir can't hold them; use -o ROOT"
+	DESTS=("$LITERAL_DST")
+fi
+
+if ((LIST_ONLY)); then
+	for i in "${!ALBUMS[@]}"; do
+		printf '%s\n  %s-> %s%s\n' "${ALBUMS[i]}" "$C_D" "${DESTS[i]}" "$C_0"
+	done
+	exit 0
+fi
+
+# ------------------------------------------------------------------- main ---
+run_album() {
+	SRC=$1 DST=$2
+	export SRC DST
+
+	local -a files
+	mapfile -d '' -t files < <(find "$SRC" -type f \( "${FIND_EXT[@]}" \) -print0 | sort -z)
+	((${#files[@]})) || return 0
+
+	printf '\n'
+	info "album:   ${SRC}"
+	info "output:  ${DST}"
+	info "files:   ${#files[@]}"
+	((DRYRUN)) || mkdir -p -- "$DST" || { warn "cannot create $DST"; return 1; }
+
+	printf '%s\0' "${files[@]}" \
+		| xargs -0 -r -P "$JOBS" -I{} bash -c 'convert_one "$1"' _ {}
+	local rc=$?
+
+	# loose cover art / booklets next to the tracks
+	if ((! DRYRUN)); then
+		local img rel n_img=0
+		while IFS= read -r -d '' img; do
+			rel=${img#"$SRC"/}
+			mkdir -p -- "$DST/$(dirname -- "$rel")"
+			if ((FORCE)); then cp --preserve=timestamps -- "$img" "$DST/$rel" && ((n_img++))
+			else cp -n --preserve=timestamps -- "$img" "$DST/$rel" 2>/dev/null && ((n_img++)); fi
+		done < <(find "$SRC" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' ')' -print0)
+		((n_img)) && info "artwork: copied $n_img image file(s) verbatim"
+	fi
+
+	N_TRACKS=$((N_TRACKS + ${#files[@]}))
+	return $((rc != 0))
+}
+
+if [[ $BITRATE ]]; then enc="libmp3lame CBR $BITRATE"; else enc="libmp3lame VBR -q $QUALITY"; fi
+info "found ${#ALBUMS[@]} album(s) — $enc, $JOBS job(s)"
+((DRYRUN)) && info "${C_Y}dry run — nothing will be written${C_0}"
+
+start=$SECONDS
+N_TRACKS=0 N_FAIL=0
+root_abs=$ROOT_ABS
+for i in "${!ALBUMS[@]}"; do
+	# never re-convert what we just wrote (e.g. output/ nested in the library)
+	if [[ $root_abs && ${ALBUMS[i]}/ == "$root_abs"/* ]]; then
+		warn "inside output root, skipping: ${ALBUMS[i]}"
+		continue
+	fi
+	run_album "${ALBUMS[i]}" "${DESTS[i]}" || ((N_FAIL++))
+done
+
+elapsed=$((SECONDS - start))
+printf '\n'
+if ((DRYRUN)); then
+	info "dry run finished — ${#ALBUMS[@]} album(s), $N_TRACKS track(s), ${elapsed}s"
+else
+	info "done: ${#ALBUMS[@]} album(s), $N_TRACKS track(s) in ${elapsed}s -> $ROOT"
+	((N_FAIL)) && warn "$N_FAIL album(s) had at least one failed track"
+fi
+exit $((N_FAIL > 0))
