@@ -1,0 +1,147 @@
+# ~/.config/sway/config — basado en config.h de dwm
+
+### Variables
+set $mod Mod4
+set $term foot
+set $menu rofi -show run
+set $font monospace 10
+set $shots ~/Pictures
+set $scripts ~/bin
+
+# Colores (mismos que dwm)
+set $norm_bg     #1C1C1C
+set $norm_border #2A2A2A
+set $norm_fg     #D4D4D4
+set $sel_fg      #FFFFFF
+set $sel_bg      #2A2A2A
+set $sel_border  #808080
+
+### Apariencia
+font pango:$font
+default_border pixel 1
+default_floating_border pixel 1
+gaps inner 0
+gaps outer 0
+focus_on_window_activation focus
+
+#                       border        bg        text      indicator    child_border
+client.focused          $sel_border   $sel_bg   $sel_fg   $sel_border  $sel_border
+client.focused_inactive $norm_border  $norm_bg  $norm_fg  $norm_border $norm_border
+client.unfocused        $norm_border  $norm_bg  $norm_fg  $norm_border $norm_border
+client.urgent           $sel_border   $sel_bg   $sel_fg   $sel_border  $sel_border
+
+### Salidas
+output * bg $norm_bg solid_color
+
+# Fija los workspaces a un monitor (nombres con: swaymsg -t get_outputs)
+# workspace 1 output eDP-1
+# workspace 2 output eDP-1
+# ...
+
+### Entrada
+input type:touchpad {
+    tap enabled
+    natural_scroll enabled
+    dwt enabled
+}
+
+### Bloqueo y suspensión
+exec swayidle -w \
+    timeout 300 'swaylock -f -c 1C1C1C' \
+    timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
+    before-sleep 'swaylock -f -c 1C1C1C'
+
+### Reglas
+for_window [app_id="gimp"] floating enable
+
+### Básicos
+bindsym $mod+Shift+Return exec $menu
+bindsym $mod+Return exec $term
+bindsym $mod+b bar mode toggle
+bindsym $mod+Shift+c kill
+bindsym $mod+Shift+r reload
+bindsym $mod+Shift+BackSpace exit
+
+### Foco y movimiento (j/k = anterior/siguiente en el workspace)
+bindsym $mod+j focus prev
+bindsym $mod+k focus next
+bindsym $mod+Shift+j move left
+bindsym $mod+Shift+k move right
+bindsym $mod+Tab workspace back_and_forth
+
+### Tamaño (h agranda, l achica la ventana enfocada)
+bindsym $mod+h resize grow width 5 ppt
+bindsym $mod+l resize shrink width 5 ppt
+
+### Layouts (t = tile, f = flotante, m = monocle/tabbed, p = alternar)
+bindsym $mod+t layout splith
+bindsym $mod+f floating toggle
+bindsym $mod+m layout tabbed
+bindsym $mod+p layout toggle split tabbed
+bindsym $mod+Shift+f fullscreen toggle
+bindsym $mod+space focus mode_toggle
+
+### Monitores (, y .)
+bindsym $mod+comma focus output left
+bindsym $mod+period focus output right
+bindsym $mod+Shift+comma move container to output left
+bindsym $mod+Shift+period move container to output right
+
+### Workspaces
+bindsym $mod+1 workspace number 1
+bindsym $mod+2 workspace number 2
+bindsym $mod+3 workspace number 3
+bindsym $mod+4 workspace number 4
+bindsym $mod+5 workspace number 5
+bindsym $mod+6 workspace number 6
+bindsym $mod+7 workspace number 7
+bindsym $mod+8 workspace number 8
+bindsym $mod+9 workspace number 9
+
+bindsym $mod+Shift+1 move container to workspace number 1
+bindsym $mod+Shift+2 move container to workspace number 2
+bindsym $mod+Shift+3 move container to workspace number 3
+bindsym $mod+Shift+4 move container to workspace number 4
+bindsym $mod+Shift+5 move container to workspace number 5
+bindsym $mod+Shift+6 move container to workspace number 6
+bindsym $mod+Shift+7 move container to workspace number 7
+bindsym $mod+Shift+8 move container to workspace number 8
+bindsym $mod+Shift+9 move container to workspace number 9
+
+### Ratón (mod+izq mover, mod+der redimensionar, mod+medio flotante)
+floating_modifier $mod normal
+bindsym --whole-window $mod+button2 floating toggle
+
+### Multimedia
+bindsym --locked XF86AudioMute exec pactl set-sink-mute \@DEFAULT_SINK@ toggle
+bindsym --locked XF86AudioLowerVolume exec pactl set-sink-volume \@DEFAULT_SINK@ -5%
+bindsym --locked XF86AudioRaiseVolume exec pactl set-sink-volume \@DEFAULT_SINK@ +5%
+bindsym --locked XF86AudioMicMute exec pactl set-source-mute \@DEFAULT_SOURCE@ toggle
+bindsym --locked XF86AudioPlay exec playerctl play-pause
+bindsym --locked XF86AudioPrev exec playerctl previous
+bindsym --locked XF86AudioNext exec playerctl next
+bindsym --locked XF86MonBrightnessDown exec brightnessctl set 5%-
+bindsym --locked XF86MonBrightnessUp exec brightnessctl set 5%+
+
+### Capturas (Print = pantalla completa, Shift+Print = región)
+bindsym Print exec grim $shots/$(date +%Y-%m-%d_%H-%M-%S).png
+bindsym Shift+Print exec grim -g "$(slurp)" $shots/$(date +%Y-%m-%d_%H-%M-%S).png
+
+### Barra
+bar {
+    position top
+    font pango:$font
+    status_command while $scripts/tmux-status; do echo; sleep 5; done
+    colors {
+        background         $norm_bg
+        statusline         $norm_fg
+        separator          $norm_border
+        #                  border        bg        text
+        focused_workspace  $sel_border   $sel_bg   $sel_fg
+        active_workspace   $norm_border  $norm_bg  $norm_fg
+        inactive_workspace $norm_border  $norm_bg  $norm_fg
+        urgent_workspace   $sel_border   $sel_bg   $sel_fg
+    }
+}
+
+include /etc/sway/config.d/*
